@@ -1,0 +1,288 @@
+[
+    {
+        "id": "25be63c8e6055f8b",
+        "type": "mqtt in",
+        "z": "17d579a3b5449418",
+        "name": "Remote",
+        "topic": "apr/evse/+/from/#",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "b31ca22498342bb6",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 90,
+        "y": 260,
+        "wires": [
+            [
+                "3d1353ad93121133"
+            ]
+        ]
+    },
+    {
+        "id": "5a160db9f1cbc87a",
+        "type": "mqtt in",
+        "z": "17d579a3b5449418",
+        "name": "Local",
+        "topic": "homeassistant/sensor/evse/+/set",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "2eeee3d.8439f9c",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 90,
+        "y": 480,
+        "wires": [
+            [
+                "1eb9d69e06493921"
+            ]
+        ]
+    },
+    {
+        "id": "3d1353ad93121133",
+        "type": "function",
+        "z": "17d579a3b5449418",
+        "name": "Select",
+        "func": "var EvseID = msg.topic.split(\"/\"); // Split EVSE topic\nEvseID = EvseID[2];                // get evse_id\n\nif ( EvseID && msg.topic.endsWith(\"/on\") )\n{ \n  node.send( [msg,null] ); \n}\n\nif (typeof msg.payload === 'object'  ) {\n  return[null,msg];\n}\nelse {\n  //node.warn( \"ELSE:\"  + msg.payload );\n}\nreturn [null,null];",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 260,
+        "wires": [
+            [
+                "df52e0505d1a2e2f"
+            ],
+            [
+                "1de1576769aa9dbe"
+            ]
+        ]
+    },
+    {
+        "id": "1de1576769aa9dbe",
+        "type": "function",
+        "z": "17d579a3b5449418",
+        "name": "state",
+        "func": "var evse_name = msg.topic.split(\"/\");    // Split EVSE topic\nevse_name = evse_name[2];                // get evse_id\n\n//// Convert the following values\nif(msg.payload.EVmod == \"M\" )      { msg.payload.EVmod = \"Manual\";}\nelse if (msg.payload.EVmod == \"N\") { msg.payload.EVmod = \"Normal\";}\nelse if (msg.payload.EVmod == \"S\") { msg.payload.EVmod = \"Solar\"; } \nelse if (msg.payload.EVmod == \"P\") { msg.payload.EVmod = \"Power\"; } \n\nif (msg.payload.Scene == 0) { msg.payload.Scene = \"Master\"; }\nelse if (msg.payload.Scene == 1 ) { msg.payload.Scene = \"Auto Bi-Horario\"; }\nelse if (msg.payload.Scene == 2 ) { msg.payload.Scene = \"Auto Scene\"; }\nelse if (msg.payload.Scene == 3 ) { msg.payload.Scene = \"Auto Solar\"; }\nelse if (msg.payload.Scene == 4 ) { msg.payload.Scene = \"Quick Charge\"; }\n\nif (msg.payload.EVsta == 1) { msg.payload.EVsta = \"Not Connected\"; }\nelse if (msg.payload.EVsta == 2) { msg.payload.EVsta = \"Connected\"; }\nelse if (msg.payload.EVsta == 3) { msg.payload.EVsta = \"Charging\"; }\nelse if (msg.payload.EVsta == 253) { msg.payload.EVsta = \"Sleep\"; }\nelse if (msg.payload.EVsta == 254) { msg.payload.EVsta = \"Disabled\"; }\n\nif (msg.payload.eNode == 0) { msg.payload.eNode = \"disabled\"; }\nelse if (msg.payload.eNode == 1) { msg.payload.eNode = \"NOK\"; }\nelse if (msg.payload.eNode == 2) { msg.payload.eNode = \"OK\"; }\n\nif (msg.payload.EVamp != undefined ) { msg.payload.EVamp = msg.payload.EVamp + \"A\"; }\n\nif (msg.payload.CHti == undefined) { msg.payload.CHti = \"-\"; }\nif (msg.payload.CHkm == undefined) { msg.payload.Chkm = \"-\"; }\nif (msg.payload.CHkmh == undefined) { msg.payload.Chkmh = \"-\"; }\nif (msg.payload.CHet == undefined) { msg.payload.CHet = \"-\"; }\nif (msg.payload.CHep == undefined) { msg.payload.CHep = \"-\"; }\n\n\nmsg.topic = \"homeassistant/sensor/evse/\" + evse_name + \"/state\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 300,
+        "wires": [
+            [
+                "e426f7681215eed7"
+            ]
+        ]
+    },
+    {
+        "id": "e426f7681215eed7",
+        "type": "mqtt out",
+        "z": "17d579a3b5449418",
+        "name": "Local",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "2eeee3d.8439f9c",
+        "x": 590,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "cdfc1ba308e8d127",
+        "type": "mqtt in",
+        "z": "17d579a3b5449418",
+        "name": "Local",
+        "topic": "homeassistant/status",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "2eeee3d.8439f9c",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 110,
+        "y": 80,
+        "wires": [
+            [
+                "34f381983b505f73"
+            ]
+        ]
+    },
+    {
+        "id": "34f381983b505f73",
+        "type": "function",
+        "z": "17d579a3b5449418",
+        "name": "Subscribe",
+        "func": "///////////////////////////////////////\n// CHANGE THIS:\nvar topic = \"apr/evse/+/from/on\";\n///////////////////////////////////////\n\n\nif ( msg.payload == \"online\" )\n{\n  msg.payload = {};\n  msg.action = \"subscribe\";\n  msg.topic = topic;\n  node.send(msg);\n\n}\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 180,
+        "y": 140,
+        "wires": [
+            [
+                "d406116867c66510"
+            ]
+        ]
+    },
+    {
+        "id": "84129d76a2cebe38",
+        "type": "comment",
+        "z": "17d579a3b5449418",
+        "name": "evse >>> HA",
+        "info": "",
+        "x": 490,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "f6c640c77f6f05be",
+        "type": "comment",
+        "z": "17d579a3b5449418",
+        "name": "HA >>> evse",
+        "info": "",
+        "x": 110,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "df52e0505d1a2e2f",
+        "type": "function",
+        "z": "17d579a3b5449418",
+        "name": "Config",
+        "func": "\nvar evse_name = msg.topic.split(\"/\");    // Split EVSE topic\nevse_name = evse_name[2];\nvar evse_status = msg.payload;\n\nvar data = {};\n\n// reusable part of the config object\n// need to deepcopy this to be able to customize if needed\nvar payload = {\n    \"state_topic\": \"homeassistant/sensor/evse/\" + evse_name + \"/state\",\n    \"device\": {\n        \"identifiers\": [\"EVSE-\" + evse_name],\n        \"name\": \"evse-\" + evse_name,\n        \"manufacturer\": \"APR\",\n        \"model\": \"EVSE Inteligente\",\n        \"sw_version\": \"1.0\"\n    }\n}\n\n\n\n//--- EVSE ONLINE/OFFLINE ---//\n\nvar sensor_name = \"status\";\nvar component = \"binary_sensor\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.state_topic = \"homeassistant/sensor/evse/\" + evse_name + \"/on\";\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.icon = \"mdi:power\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- EVSE enable/disable ---//\n\nvar sensor_name = \"command\";\nvar component = \"switch\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.state_on = \"enable\";\ndata.payload.state_off = \"disable\";\ndata.payload.payload_on = \"enable\";\ndata.payload.payload_off = \"disable\";\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.icon = \"mdi:toggle-switch-outline\";\ndata.payload.command_topic = \"homeassistant/sensor/evse/\" + evse_name + \"/set\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- EVmod ---//\n\nvar sensor_name_original = \"EVmod\";\nvar sensor_name = \"mode\";\nvar component = \"select\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = \"{{ value_json.\" + sensor_name_original + \" }}\";\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.command_topic = \"homeassistant/sensor/evse/\" + evse_name + \"/set\";\ndata.payload.options = [\"Manual\", \"Normal\", \"Solar\", \"Power\"];\ndata.payload.icon = \"mdi:brain\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- Scene ---//\n\nvar sensor_name_original = \"Scene\";\nvar sensor_name = \"scene\";\nvar component = \"select\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = \"{{ value_json.\" + sensor_name_original + \" }}\";\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.command_topic = \"homeassistant/sensor/evse/\" + evse_name + \"/set\";\ndata.payload.options = [\"Master\", \"Auto Bi-Horario\", \"Auto Scene\", \"Auto Solar\", \"Quick Charge\"];\ndata.payload.icon = \"mdi:robot\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- EVamp ---//\n\nvar sensor_name_original = \"EVamp\";\nvar sensor_name = \"amps\";\nvar component = \"select\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = \"{{ value_json.\" + sensor_name_original + \" }}\";\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.command_topic = \"homeassistant/sensor/evse/\" + evse_name + \"/set\";\ndata.payload.options = [\"6A\", \"7A\", \"8A\", \"9A\", \"10A\", \"11A\", \"12A\", \"13A\", \"14A\", \"15A\", \"16A\", \"17A\", \"18A\", \"19A\", \"20A\", \"21A\", \"22A\", \"23A\", \"24A\", \"25A\", \"26A\", \"27A\", \"28A\", \"29A\", \"30A\", \"31A\", \"32A\"];\ndata.payload.command_template = 'a{{ value.split(\"A\")[0] }}';\ndata.payload.icon = \"mdi:current-ac\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- EVsta ---//\n\nvar sensor_name_original = \"EVsta\";\nvar sensor_name = \"state\";\nvar component = \"sensor\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = \"{{ value_json.\" + sensor_name_original + \" }}\";\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.icon = \"mdi:car-electric\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- eNode ---//\n\nvar sensor_name_original = \"eNode\";\nvar sensor_name = \"eNode\";\nvar component = \"sensor\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = \"{{ value_json.\" + sensor_name_original + \" }}\";\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.icon = \"mdi:connection\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- T ---//\nvar sensor_name_original = \"T\";\nvar sensor_name = \"temperature\";\nvar component = \"sensor\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = \"{{ value_json.\" + sensor_name_original + \" }}\";\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.device_class = \"temperature\";\ndata.payload.unit_of_measurement = \"°C\";\ndata.payload.icon = \"mdi:thermometer\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- V ---//\n\nvar sensor_name_original = \"V\";\nvar sensor_name = \"volt\";\nvar component = \"sensor\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = \"{{ value_json.\" + sensor_name_original + \" }}\";\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.device_class = \"voltage\";\ndata.payload.unit_of_measurement = \"V\";\ndata.payload.icon = \"mdi:lightning-bolt-outline\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- I ---//\n\nvar sensor_name_original = \"I\";\nvar sensor_name = \"current\";\nvar component = \"sensor\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = \"{{ value_json.\" + sensor_name_original + \" }}\";\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.device_class = \"current\";\ndata.payload.unit_of_measurement = \"A\";\ndata.payload.icon = \"mdi:current-ac\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- P ---//\n\nvar sensor_name_original = \"P\";\nvar sensor_name = \"power\";\nvar component = \"sensor\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = \"{{ (value_json.\" + sensor_name_original + \"|float/1000)|round(1) }}\";\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.device_class = \"power\";\ndata.payload.unit_of_measurement = \"kW\";\ndata.payload.icon = \"mdi:lightning-bolt\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- CHti ---//\n\nvar sensor_name_original = \"CHti\";\nvar sensor_name = \"time\";\nvar component = \"sensor\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = `{{ value_json.${sensor_name_original}|timestamp_custom(\"%H:%M:%S\", 0) }}`;\ndata.payload.unit_of_measurement = \"\";\n//data.payload.value_template = `{{ value_json.${sensor_name_original} }}`;\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.icon = \"mdi:timer-sand\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- CHet ---//\n\nvar sensor_name_original = \"CHet\";\nvar sensor_name = \"energy\";\nvar component = \"sensor\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = `{{ (value_json.${sensor_name_original}|float/1000)|round(3)  }}`;\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.unit_of_measurement = \"kWh\";\ndata.payload.icon = \"mdi:battery-charging-medium\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- CHel ---//\n\nvar sensor_name_original = \"CHel\";\nvar sensor_name = \"energy_battery\";\nvar component = \"sensor\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = `{{ (value_json.${sensor_name_original}|float/1000)|round(3)  }}`;\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.unit_of_measurement = \"kWh\";\ndata.payload.icon = \"mdi:battery-40\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- CHep ---//\n\nvar sensor_name_original = \"CHep\";\nvar sensor_name = \"energy_percent\";\nvar component = \"sensor\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = `{{ (value_json.${sensor_name_original}|float)|round(3)  }}`;\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.unit_of_measurement = \"%\";\ndata.payload.icon = \"mdi:ruler\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- CHkmh ---//\n\nvar sensor_name_original = \"CHkmh\";\nvar sensor_name = \"energy_kmh\";\nvar component = \"sensor\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = `{{ value_json.${sensor_name_original} }}`;\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.unit_of_measurement = \"km/h\";\ndata.payload.icon = \"mdi:snail\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n\n//--- CHkm ---//\n\nvar sensor_name_original = \"CHkm\";\nvar sensor_name = \"energy_km\";\nvar component = \"sensor\";\n\ndata.payload = JSON.parse(JSON.stringify(payload)); // deep copy\ndata.payload.name = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.value_template = `{{ (value_json.${sensor_name_original}|float)|round(3)  }}`;\ndata.payload.unique_id = \"evse-\" + evse_name + \"-\" + sensor_name;\ndata.payload.unit_of_measurement = \"Km\";\ndata.payload.icon = \"mdi:pin-outline\";\ndata.topic = \"homeassistant/\" + component + \"/evse/\" + evse_name + \"-\" + sensor_name + \"/config\";\nnode.send(data);\n\n// Send the EVSE status:\ndata.topic = \"homeassistant/sensor/evse/\" + evse_name + \"/on\";\nif (evse_status == \"off\") { data.payload = \"OFF\"; }\nelse { data.payload = \"ON\"; }\nnode.send(data);\n\n// and request info from EVSE to populate the sensors\ndata.topic = \"homeassistant/sensor/evse/\" + evse_name + \"/set\";\ndata.payload = \"$G0\";\nnode.send(data);\n\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 220,
+        "wires": [
+            [
+                "e426f7681215eed7"
+            ]
+        ]
+    },
+    {
+        "id": "d406116867c66510",
+        "type": "mqtt in",
+        "z": "17d579a3b5449418",
+        "name": "Remote",
+        "topic": "",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "b31ca22498342bb6",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 1,
+        "x": 250,
+        "y": 200,
+        "wires": [
+            [
+                "df52e0505d1a2e2f"
+            ]
+        ]
+    },
+    {
+        "id": "1eb9d69e06493921",
+        "type": "function",
+        "z": "17d579a3b5449418",
+        "name": "Convert",
+        "func": "var evse_name = msg.topic.split(\"/\");    // Split EVSE topic\nevse_name = evse_name[3];                // get evse_id\n\nmsg.topic = \"apr/evse/\" + evse_name + \"/to\";\n\n// convert commands from HA to EVSE\n\nswitch (msg.payload) {\n    case \"enable\":\n        msg.payload = \"E\";\n        break;\n    case \"disable\":\n        msg.payload = \"D\";\n        break;\n    case \"Manual\":\n        msg.payload = \"MM\";\n        break;\n    case \"Normal\":\n        msg.payload = \"MN\";\n        break;\n    case \"Solar\":\n        msg.payload = \"MS\";\n        break;\n    case \"Power\":\n        msg.payload = \"MP\";\n        break;\n    case \"Master\":\n        msg.payload = \"s0\";\n        break;\n    case \"Auto Bi-Horario\":\n        msg.payload = \"s1\";\n        break;\n    case \"Auto Scene\":\n        msg.payload = \"s2\";\n        break;\n    case \"Auto Solar\":\n        msg.payload = \"s3\";\n        break;\n    case \"Quick Charge\":\n        msg.payload = \"s4\";\n        break;\n    default:\n} \n\nnode.warn(msg.topic + \":\" + msg.payload );\n\n/*\n           0: \"Master\",\n           1: \"Auto Bi-Horario\",\n           2: \"Auto Scene\",\n           3: \"Auto Solar\",\n           4: \"Quick Charge\",\n\n\n\n\n\n*/\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 480,
+        "wires": [
+            [
+                "c8e593d5deacf4d2"
+            ]
+        ]
+    },
+    {
+        "id": "c8e593d5deacf4d2",
+        "type": "mqtt out",
+        "z": "17d579a3b5449418",
+        "name": "Remote",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "b31ca22498342bb6",
+        "x": 560,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "b31ca22498342bb6",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "cloud.missingbolt.com",
+        "port": "8883",
+        "tls": "",
+        "clientid": "APR_NR",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "2eeee3d.8439f9c",
+        "type": "mqtt-broker",
+        "name": "local",
+        "broker": "192.168.20.1",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": true,
+        "keepalive": "15",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    }
+]
